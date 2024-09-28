@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
     cout << "ORIGINAL IMAGE:" << endl << original_image.topLeftCorner(6,6) << endl;
 
     // first we have to define the noise image 
-    Matrix<unsigned char, Dynamic, Dynamic, RowMajor> noised_image(height, width);
+    Matrix<unsigned char, Dynamic, Dynamic, RowMajor> noisy_image(height, width);
         //% We have to define the matrix in this way because we don't knwo yet the size of the matrix
         //% then the size will be found in run time, also we want to be sure it's unsigned char, given that we know for sure 
         //% that we are handle positive values in a range of [0,255], given that is a gray image 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]){
     srand(static_cast<unsigned int>(time(0)));
 
     // We will applied to each pixel a random fluctation of color ranging between [-50,50]
-    noised_image = original_image.unaryExpr([](int val) -> unsigned char {
+    noisy_image = original_image.unaryExpr([](int val) -> unsigned char {
         // Generate random noise in range [-50, 50]
         int noise = (rand() % 101) - 50; // random number between 0 and 100, then shift to [-50, 50]
 
@@ -91,16 +91,77 @@ int main(int argc, char* argv[]){
         return static_cast<unsigned char>(new_val);
     });
 
-    // Save the noised_image using stb_image_write
-    const string output_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/noised_image.png";
-    if (stbi_write_png(output_image_path.c_str(), width, height, 1, noised_image.data(), width) == 0){
+    // Save the noisy_image using stb_image_write
+    const string output_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/noisy_image.png";
+    if (stbi_write_png(output_image_path.c_str(), width, height, 1, noisy_image.data(), width) == 0){
         // c_str: is to pass the output path in C_style
-        cerr << "Error: Could not save noised image" << endl;
+        cerr << "Error: Could not save noisy image" << endl;
         return 1;
     }
 
-    cout << "Noised image saved to " << output_image_path << endl;
+    cout << "Noisy image saved to " << output_image_path << endl;
+
+    //! 3. Reshape original and noisy image to vectors v and w
+
+    // define vector to store the matrices 
+    VectorXd v(height*width);
+    VectorXd w(height*width);
+
+    // create a Dynamic vector 
+    // MatrixXd<double, Dynamic, 1> v(height*width);
+    // MatrixXd<double, Dynamic, 1> w(height*width);
+
+    // Matrix<int, Dynamic, 1> v(5);
+
+    // fill thse vectors
+    for(int i = 0; i < height; i++){
+        for(int j = 0 ; j < width; j++){
+            v((i*width) + j) = static_cast<double>(original_image(i,j));
+            w((i*width) + j) = static_cast<double>(noisy_image(i,j));
+        }
+    }
+
+    cout << "The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
+
+    //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
+
+    // Initialize the A_1 matrix
+    int m = height;
+    int n = width;
+    MatrixXd A_1 = Zero(m*n, m*n);
+
+    // initialise the kernel H_av2
+    double constantValue = (1/9);
+    Matrix H_av2 = Constant(3,3, constantValue);
+    int km = H_av2.size();
+    int kn = H_av2[0].size();
+
+    // Fill the A_1 matrix, in such a way to create the convolutional matrix over a vector image
+    int non_zero = 0, // this count the number of non-zero entris that has the A_1 matrix
+
+    // make iteration over the A_1 matrix
+    for(int i=0; i < m; i++){
+        for(int j=0; j< n; j++){
+            int index = (i*n) + j;
+            // make iteration over kernel matrix
+            for(int ki = 0; ki < km; ki++){
+                for(int kj = 0; kj < km; kj++){
+                    // offsets
+                    int x_offset = 
+                    // check if the pixel is inside or outside
+                    if()
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
     return 0;
-
-
 }
