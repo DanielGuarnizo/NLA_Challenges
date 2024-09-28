@@ -1,5 +1,7 @@
 #include <Eigen/Dense>
 #include <iostream>
+#include <cstdlib>   // For rand() and srand()
+#include <ctime>     // For time()
 
 // Include header files to read and write in images
 #define STB_IMAGE_IMPLEMENTATION
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]){
     //! 2. POINT: INTRDUCE NOISE SIGNAL INTO THE LOADED IMAGE
 
     // First we cast each value of the image to an int value, in such a way to be able to perform operations
-    MatrixXd original_image(width, height); // initialize the matrix where we will store the casting values
+    MatrixXd original_image(height, width); // initialize the matrix where we will store the casting values
     
     for (int i = 0; i < height; ++i) {
         for(int j = 0; j < width; j++){
@@ -65,12 +67,40 @@ int main(int argc, char* argv[]){
     // Free memory
     stbi_image_free(image_data);
 
-    cout << "ORIGINAL IMAGE:" << endl << original_image.topLeftCorner(6,6),
+    // check top left corner of the original image
+    cout << "ORIGINAL IMAGE:" << endl << original_image.topLeftCorner(6,6) << endl;
 
+    // first we have to define the noise image 
+    Matrix<unsigned char, Dynamic, Dynamic, RowMajor> noised_image(height, width);
+        //% We have to define the matrix in this way because we don't knwo yet the size of the matrix
+        //% then the size will be found in run time, also we want to be sure it's unsigned char, given that we know for sure 
+        //% that we are handle positive values in a range of [0,255], given that is a gray image 
+
+    // Seed the random number generator once, before the loop
+    srand(static_cast<unsigned int>(time(0)));
 
     // We will applied to each pixel a random fluctation of color ranging between [-50,50]
+    noised_image = original_image.unaryExpr([](int val) -> unsigned char {
+        // Generate random noise in range [-50, 50]
+        int noise = (rand() % 101) - 50; // random number between 0 and 100, then shift to [-50, 50]
 
-    
+        // Apply noise, ensuring values stay within the [0, 255] range
+        int new_val = val + noise;
+        if (new_val < 0) new_val = 0;
+        if (new_val > 255) new_val = 255;
+        return static_cast<unsigned char>(new_val);
+    });
+
+    // Save the noised_image using stb_image_write
+    const string output_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/noised_image.png";
+    if (stbi_write_png(output_image_path.c_str(), width, height, 1, noised_image.data(), width) == 0){
+        // c_str: is to pass the output path in C_style
+        cerr << "Error: Could not save noised image" << endl;
+        return 1;
+    }
+
+    cout << "Noised image saved to " << output_image_path << endl;
+    return 0;
 
 
 }
