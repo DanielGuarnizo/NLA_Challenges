@@ -22,7 +22,11 @@ before including these headers enables the actual function implementations.
 using namespace Eigen;
 using namespace std;
 
+
 int main(int argc, char* argv[]){
+    // Initialize the kernels before using them
+    initializeKernels();
+
     //@ Note:char* instead of taking the string that we pass as argument 
     //@ it takes the pointer where this string is saved in memory
    
@@ -128,42 +132,6 @@ int main(int argc, char* argv[]){
     int m = height;
     int n = width;
 
-    // SparseMatrix<double> A_1(m * n, m * n);
-    //     //% Using Sparse matrix significally reduce the memory footprint, given that most of the values are zero
-    //     //% Computation such as matrix multiplication are optimize for Sparse matrices and then more efficient to use
-    // vector<Triplet<double>> tripletList;
-    //     //% we use this to store only the non-zero values of the sparse matrix in the following way (row, column, value)
-
-    // // Kernel initialization (remains the same)
-    // double constantValue = 1.0 / 9.0;
-    // MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
-
-    // // variable to count the number of non zero entries of A_1
-    // int count = 0;
-
-    // // Fill sparse matrix A_1
-    // for (int i = 0; i < m; i++) {
-    //     for (int j = 0; j < n; j++) {
-    //         int index = (i * n) + j; // specify the row index in A_1
-    //         for (int ki = 0; ki < 3; ki++) {
-    //             for (int kj = 0; kj < 3; kj++) {
-    //                 int imgX = i + ki - 1;
-    //                 int imgY = j + kj - 1;
-
-    //                 if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n) {
-    //                     int kernelIndex = imgX * n + imgY; // specify the column index in A_1
-    //                     tripletList.push_back(Triplet<double>(index, kernelIndex, H_av2(ki, kj)));
-    //                     count += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // cout << "The number of non zero entries in the A_1 matrix are: " << count << endl;
-
-    // // Construct the sparse matrix
-    // A_1.setFromTriplets(tripletList.begin(), tripletList.end()); // Method specifically from the Sparse matrices 
-
     // make a function that creates the convolutional matrix and provided 
     SparseMatrix<double> A_1 = createConvolutionalMatrix(m, n, H_av2);
 
@@ -200,8 +168,19 @@ int main(int argc, char* argv[]){
 
 
     //! 6 
+    // construct A_2 matrix using the H_sh2 kernel 
+    SparseMatrix<double> A_2 = createConvolutionalMatrix(n,m, H_sh2);
+
+    // check if A_2 is symmetric
+    if(A_2.isApprox(A_2.transpose()) == 0) {
+        cout << "Matrix A_2 is transpose ? --> False"  << endl;
+    } else {
+        cout << "Matrix A_2 is transpose ? --> True"  << endl;
+    }
+    
+
+    //! 7
+
 
     return 0;
-
-
 }

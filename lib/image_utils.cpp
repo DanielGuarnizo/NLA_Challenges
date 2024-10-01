@@ -15,10 +15,18 @@ double constantValue = 1.0 / 9.0;
 MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
 
 //& H_sh2
+MatrixXd H_sh2; // Define H_sh2 here
+
+// initialize kernels 
+void initializeKernels() {
+    H_sh2 = MatrixXd::Zero(3, 3);  // Initialize to zero
+    H_sh2 << 0.0, -3.0, 0.0,
+             -1.0, 9.0, -3.0,
+             0.0, -1.0, 0.0;
+}
 
 
-
-
+// Initialize functions
 void saveImage(const string& path, int width, int height, int channels, const vector<unsigned char>& image_data) {
     // Save the image as PNG using stb_image_write
     if (stbi_write_png(path.c_str(), width, height, channels, image_data.data(), width * channels) == 0) {
@@ -37,24 +45,20 @@ SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const M
     vector<Triplet<double>> tripletList;
         //% we use this to store only the non-zero values of the sparse matrix in the following way (row, column, value)
 
-    // Kernel initialization (remains the same)
-    // double constantValue = 1.0 / 9.0;
-    // MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
-
-    // variable to count the number of non zero entries of A_1
+    // variable to count the number of non zero entries of the sparse matrix
     int count = 0;
 
     // Fill sparse matrix A_1
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            int index = (i * n) + j; // specify the row index in A_1
+            int index = (i * n) + j; // specify the row index in the sparse matrix
             for (int ki = 0; ki < 3; ki++) {
                 for (int kj = 0; kj < 3; kj++) {
                     int imgX = i + ki - 1;
                     int imgY = j + kj - 1;
 
                     if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n) {
-                        int kernelIndex = imgX * n + imgY; // specify the column index in A_1
+                        int kernelIndex = imgX * n + imgY; // specify the column index in the sparse matrix
                         tripletList.push_back(Triplet<double>(index, kernelIndex, kernel(ki, kj)));
                         count += 1;
                     }
