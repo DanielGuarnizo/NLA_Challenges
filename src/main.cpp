@@ -5,6 +5,9 @@
 #include <cstdlib>   // For rand() and srand()
 #include <ctime>     // For time()
 
+// my utils
+#include "../include/image_utils.hpp"
+
 // Include header files to read and write in images
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
@@ -125,42 +128,52 @@ int main(int argc, char* argv[]){
     int m = height;
     int n = width;
 
-    SparseMatrix<double> A_1(m * n, m * n);
-        //% Using Sparse matrix significally reduce the memory footprint, given that most of the values are zero
-        //% Computation such as matrix multiplication are optimize for Sparse matrices and then more efficient to use
-    vector<Triplet<double>> tripletList;
-        //% we use this to store only the non-zero values of the sparse matrix in the following way (row, column, value)
+    // SparseMatrix<double> A_1(m * n, m * n);
+    //     //% Using Sparse matrix significally reduce the memory footprint, given that most of the values are zero
+    //     //% Computation such as matrix multiplication are optimize for Sparse matrices and then more efficient to use
+    // vector<Triplet<double>> tripletList;
+    //     //% we use this to store only the non-zero values of the sparse matrix in the following way (row, column, value)
 
-    // Kernel initialization (remains the same)
-    double constantValue = 1.0 / 9.0;
-    MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
+    // // Kernel initialization (remains the same)
+    // double constantValue = 1.0 / 9.0;
+    // MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
 
-    // Fill sparse matrix A_1
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            int index = (i * n) + j; // specify the row index in A_1
-            for (int ki = 0; ki < 3; ki++) {
-                for (int kj = 0; kj < 3; kj++) {
-                    int imgX = i + ki - 1;
-                    int imgY = j + kj - 1;
+    // // variable to count the number of non zero entries of A_1
+    // int count = 0;
 
-                    if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n) {
-                        int kernelIndex = imgX * n + imgY; // specify the column index in A_1
-                        tripletList.push_back(Triplet<double>(index, kernelIndex, H_av2(ki, kj)));
-                    }
-                }
-            }
-        }
-    }
+    // // Fill sparse matrix A_1
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n; j++) {
+    //         int index = (i * n) + j; // specify the row index in A_1
+    //         for (int ki = 0; ki < 3; ki++) {
+    //             for (int kj = 0; kj < 3; kj++) {
+    //                 int imgX = i + ki - 1;
+    //                 int imgY = j + kj - 1;
 
-    // Construct the sparse matrix
-    A_1.setFromTriplets(tripletList.begin(), tripletList.end()); // Method specifically from the Sparse matrices 
+    //                 if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n) {
+    //                     int kernelIndex = imgX * n + imgY; // specify the column index in A_1
+    //                     tripletList.push_back(Triplet<double>(index, kernelIndex, H_av2(ki, kj)));
+    //                     count += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // cout << "The number of non zero entries in the A_1 matrix are: " << count << endl;
 
-    //! Multiply A_1 with w (noisy image vector)
+    // // Construct the sparse matrix
+    // A_1.setFromTriplets(tripletList.begin(), tripletList.end()); // Method specifically from the Sparse matrices 
+
+    // make a function that creates the convolutional matrix and provided 
+    SparseMatrix<double> A_1 = createConvolutionalMatrix(m, n, H_av2);
+
+    //! 5 Applied the A_1 smooth filter to the noisy image doing a matrix vector multiplication
+
+    // Multiply A_1 with w (noisy image vector)
     VectorXd result_vector = A_1 * w;
         //% This matrix vector multiplication provide a vector that have to convert into a 2D image -->
 
-    //! Reshape result_vector to image matrix
+    // Reshape result_vector to image matrix
     MatrixXd result_image(m, n);
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -168,34 +181,26 @@ int main(int argc, char* argv[]){
         }
     }
 
-    //! Save the resulting image
+    // Save the resulting image
+    // Vector to store unsigned char pixel values (for the image)
     vector<unsigned char> output_image_data(m * n);
+
+    // Convert the MatrixXd to unsigned char and clamp values between 0 and 255
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
+            // Clamp the result to [0, 255] and cast it to unsigned char
             output_image_data[i * n + j] = static_cast<unsigned char>(std::min(std::max(result_image(i, j), 0.0), 255.0));
         }
     }
-    output_image_data = result_image.unaryExpr([] (double val -> unsigned char {
-        return static_cast<unsigned char>()
-    }));
-    noisy_image = original_image.unaryExpr([](int val) -> unsigned char {
-        // Generate random noise in range [-50, 50]
-        int noise = (rand() % 101) - 50; // random number between 0 and 100, then shift to [-50, 50]
 
-        // Apply noise, ensuring values stay within the [0, 255] range
-        int new_val = val + noise;
-        if (new_val < 0) new_val = 0;
-        if (new_val > 255) new_val = 255;
-        return static_cast<unsigned char>(new_val);
-    });
+    // Save the resulting image using utils 
+    const string result_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    saveImage(result_image_path, width, height, channels, output_image_data);
 
-    const string result_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/convolutional_image.png";
-    if (stbi_write_png(result_image_path.c_str(), width, height, 1, output_image_data.data(), width) == 0) {
-        cerr << "Error: Could not save result image" << endl;
-        return 1;
-    }
 
-    cout << "Image saved successfully at " << result_image_path << endl;
+
+    //! 6 
+
     return 0;
 
 
