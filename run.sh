@@ -63,3 +63,6 @@ if [ $? -eq 0 ]; then
 else
     echo "Compilation failed."
 fi
+
+#! COMMAND TO RUN THE MAIN FILE 
+#./run.sh main ./data/images/256px-Albert_Einstein_Head.jpg

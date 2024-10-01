@@ -1,4 +1,6 @@
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
+#include <vector>
 #include <iostream>
 #include <cstdlib>   // For rand() and srand()
 #include <ctime>     // For time()
@@ -107,12 +109,6 @@ int main(int argc, char* argv[]){
     VectorXd v(height*width);
     VectorXd w(height*width);
 
-    // create a Dynamic vector 
-    // MatrixXd<double, Dynamic, 1> v(height*width);
-    // MatrixXd<double, Dynamic, 1> w(height*width);
-
-    // Matrix<int, Dynamic, 1> v(5);
-
     // fill thse vectors
     for(int i = 0; i < height; i++){
         for(int j = 0 ; j < width; j++){
@@ -128,40 +124,79 @@ int main(int argc, char* argv[]){
     // Initialize the A_1 matrix
     int m = height;
     int n = width;
-    MatrixXd A_1 = Zero(m*n, m*n);
 
-    // initialise the kernel H_av2
-    double constantValue = (1/9);
-    Matrix H_av2 = Constant(3,3, constantValue);
-    int km = H_av2.size();
-    int kn = H_av2[0].size();
+    SparseMatrix<double> A_1(m * n, m * n);
+        //% Using Sparse matrix significally reduce the memory footprint, given that most of the values are zero
+        //% Computation such as matrix multiplication are optimize for Sparse matrices and then more efficient to use
+    vector<Triplet<double>> tripletList;
+        //% we use this to store only the non-zero values of the sparse matrix in the following way (row, column, value)
 
-    // Fill the A_1 matrix, in such a way to create the convolutional matrix over a vector image
-    int non_zero = 0, // this count the number of non-zero entris that has the A_1 matrix
+    // Kernel initialization (remains the same)
+    double constantValue = 1.0 / 9.0;
+    MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
 
-    // make iteration over the A_1 matrix
-    for(int i=0; i < m; i++){
-        for(int j=0; j< n; j++){
-            int index = (i*n) + j;
-            // make iteration over kernel matrix
-            for(int ki = 0; ki < km; ki++){
-                for(int kj = 0; kj < km; kj++){
-                    // offsets
-                    int x_offset = 
-                    // check if the pixel is inside or outside
-                    if()
+    // Fill sparse matrix A_1
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            int index = (i * n) + j; // specify the row index in A_1
+            for (int ki = 0; ki < 3; ki++) {
+                for (int kj = 0; kj < 3; kj++) {
+                    int imgX = i + ki - 1;
+                    int imgY = j + kj - 1;
+
+                    if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n) {
+                        int kernelIndex = imgX * n + imgY; // specify the column index in A_1
+                        tripletList.push_back(Triplet<double>(index, kernelIndex, H_av2(ki, kj)));
+                    }
                 }
             }
         }
     }
 
+    // Construct the sparse matrix
+    A_1.setFromTriplets(tripletList.begin(), tripletList.end()); // Method specifically from the Sparse matrices 
 
+    //! Multiply A_1 with w (noisy image vector)
+    VectorXd result_vector = A_1 * w;
+        //% This matrix vector multiplication provide a vector that have to convert into a 2D image -->
 
+    //! Reshape result_vector to image matrix
+    MatrixXd result_image(m, n);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            result_image(i, j) = result_vector((i * n) + j);
+        }
+    }
 
+    //! Save the resulting image
+    vector<unsigned char> output_image_data(m * n);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            output_image_data[i * n + j] = static_cast<unsigned char>(std::min(std::max(result_image(i, j), 0.0), 255.0));
+        }
+    }
+    output_image_data = result_image.unaryExpr([] (double val -> unsigned char {
+        return static_cast<unsigned char>()
+    }));
+    noisy_image = original_image.unaryExpr([](int val) -> unsigned char {
+        // Generate random noise in range [-50, 50]
+        int noise = (rand() % 101) - 50; // random number between 0 and 100, then shift to [-50, 50]
 
+        // Apply noise, ensuring values stay within the [0, 255] range
+        int new_val = val + noise;
+        if (new_val < 0) new_val = 0;
+        if (new_val > 255) new_val = 255;
+        return static_cast<unsigned char>(new_val);
+    });
 
+    const string result_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/convolutional_image.png";
+    if (stbi_write_png(result_image_path.c_str(), width, height, 1, output_image_data.data(), width) == 0) {
+        cerr << "Error: Could not save result image" << endl;
+        return 1;
+    }
 
-
-
+    cout << "Image saved successfully at " << result_image_path << endl;
     return 0;
+
+
 }
