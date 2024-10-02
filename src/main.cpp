@@ -127,6 +127,8 @@ int main(int argc, char* argv[]){
 
     cout << "The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
 
+     cout << "The Euclidean Norm of the vector v is: "<< v.norm() << endl;
+
     //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
 
     // Initialize the A_1 matrix
@@ -162,7 +164,10 @@ int main(int argc, char* argv[]){
         //% in this fucntion the matrix vector multiplication is computed and then the image is saved
         //% using a function saveImage() to finish the procedure
 
-    //! 8
+    //! 8 Export A_2 and w in .mtx format and compute the approximate solution using the LIS library
+
+
+
 
 
     return 0;
