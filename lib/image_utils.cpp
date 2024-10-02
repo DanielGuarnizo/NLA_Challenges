@@ -20,12 +20,12 @@ MatrixXd H_sh2; // Define H_sh2 here
 // initialize kernels 
 void initializeKernels() {
     H_sh2 = MatrixXd::Zero(3, 3);  // Initialize to zero
-    // H_sh2 << 0.0, -3.0, 0.0,
-    //          -1.0, 9.0, -3.0,
-    //          0.0, -1.0, 0.0;
-    H_sh2 << 0.0, -1.0, 0.0,
-             -1.0, 5.0, -1.0,
+    H_sh2 << 0.0, -3.0, 0.0,
+             -1.0, 9.0, -3.0,
              0.0, -1.0, 0.0;
+    // H_sh2 << 0.0, -1.0, 0.0,
+    //          -1.0, 5.0, -1.0,
+    //          0.0, -1.0, 0.0;
 }
 
 // Initialize functions
@@ -75,32 +75,69 @@ SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const M
     return A;
 }
 
-void appliedConvolutionToImage(const SparseMatrix<double>& matrix, const VectorXd& image, const string& result_image_path, const int n, const int m, const int channels){
+// void appliedConvolutionToImage(const SparseMatrix<double>& matrix, const VectorXd& image, const string& result_image_path, const int n, const int m, const int channels){
+//     // Multiply A_1 with w (noisy image vector)
+//     VectorXd result_vector = matrix * image;
+//         //% This matrix vector multiplication provide a vector that have to convert into a 2D image -->
+
+//     // Reshape result_vector to image matrix
+//     MatrixXd result_image_normalize(m, n);
+//     for (int i = 0; i < m; ++i) {
+//         for (int j = 0; j < n; ++j) {
+//             result_image_normalize(i, j) = result_vector((i * n) + j);
+//         }
+//     }
+    
+//     // Save the resulting image
+//     // Vector to store unsigned char pixel values (for the image)
+//     vector<unsigned char> output_image_data(m * n);
+
+//     // Convert the MatrixXd to unsigned char and clamp values between 0 and 255
+//     for (int i = 0; i < m; ++i) {
+//         for (int j = 0; j < n; ++j) {
+//             // Clamp the result to [0, 255] and cast it to unsigned char
+//             output_image_data[i * n + j] = static_cast<unsigned char>(result_image_normalize(i, j) * 255.0);
+//         }
+//     }
+
+//     // Save the resulting image using utils 
+//     saveImage(result_image_path, n, m, channels, output_image_data);
+// }
+
+void appliedConvolutionToImage(const SparseMatrix<double>& matrix, const VectorXd& image, const string& result_image_path, const int n, const int m, const int channels) {
     // Multiply A_1 with w (noisy image vector)
     VectorXd result_vector = matrix * image;
-        //% This matrix vector multiplication provide a vector that have to convert into a 2D image -->
-
+    
     // Reshape result_vector to image matrix
-    MatrixXd result_image(m, n);
+    MatrixXd result_image_normalize(m, n);
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
-            result_image(i, j) = result_vector((i * n) + j);
+            result_image_normalize(i, j) = result_vector((i * n) + j);
         }
     }
+
+    // Find the min and max values of the result_image_normalize
+    double min_val = result_image_normalize.minCoeff();
+    double max_val = result_image_normalize.maxCoeff();
+    
+    // Normalize the result image to range [0, 1] to avoid overflow/underflow
+    result_image_normalize = (result_image_normalize.array() - min_val) / (max_val - min_val);
 
     // Save the resulting image
     // Vector to store unsigned char pixel values (for the image)
     vector<unsigned char> output_image_data(m * n);
 
-    // Convert the MatrixXd to unsigned char and clamp values between 0 and 255
+    // Convert the MatrixXd to unsigned char and scale to [0, 255]
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
             // Clamp the result to [0, 255] and cast it to unsigned char
-            output_image_data[i * n + j] = static_cast<unsigned char>(std::min(std::max(result_image(i, j), 0.0), 255.0));
+            output_image_data[i * n + j] = static_cast<unsigned char>(result_image_normalize(i, j) * 255.0);
         }
     }
 
     // Save the resulting image using utils 
     saveImage(result_image_path, n, m, channels, output_image_data);
 }
+
+
 

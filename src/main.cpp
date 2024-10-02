@@ -111,17 +111,17 @@ int main(int argc, char* argv[]){
 
     cout << "Noisy image saved to " << output_image_path << endl;
 
-    //! 3. Reshape original and noisy image to vectors v and w
+    //! 3. Reshape original and noisy image to vectors v and w and perform norm 
 
     // define vector to store the matrices 
     VectorXd v(height*width);
     VectorXd w(height*width);
 
-    // fill thse vectors
+    // fill thse vectors and normalize them 
     for(int i = 0; i < height; i++){
         for(int j = 0 ; j < width; j++){
-            v((i*width) + j) = static_cast<double>(original_image(i,j));
-            w((i*width) + j) = static_cast<double>(noisy_image(i,j));
+            v((i*width) + j) = static_cast<double>(original_image(i,j) / 255.0);
+            w((i*width) + j) = static_cast<double>(noisy_image(i,j) / 255.0);
         }
     }
 
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]){
 
     //! 6 Write a convolutional operator for the sharpeing kernel H_sh2
     // construct A_2 matrix using the H_sh2 kernel 
-    SparseMatrix<double> A_2 = createConvolutionalMatrix(n,m, H_sh2);
+    SparseMatrix<double> A_2 = createConvolutionalMatrix(m,n, H_sh2);
 
     // check if A_2 is symmetric
     if(A_2.isApprox(A_2.transpose()) == 0) {
