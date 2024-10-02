@@ -1,6 +1,6 @@
 
 # #! COMMAND TO RUN THE MAIN FILE 
-# #./run.sh main ./data/images/256px-Albert_Einstein_Head.jpg
+#./run.sh main ./data/images/256px-Albert_Einstein_Head.jpg
 
 #!/bin/bash
 

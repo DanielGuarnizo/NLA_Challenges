@@ -6,6 +6,7 @@
 #include "stb_image_write.h"  // STB library for writing images
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <iostream>
 
 using namespace std; 
 using namespace Eigen;
@@ -20,5 +21,9 @@ void saveImage(const string& path, int width, int height, int channels, const ve
 SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const MatrixXd& kernel);
 
 void initializeKernels();
+
+void appliedConvolutionToImage(const SparseMatrix<double>& matrix, const VectorXd& image, const std::string& result_image_path, int n, int m, int channels);
+
+
 
 #endif // IMAGE_UTILS_H

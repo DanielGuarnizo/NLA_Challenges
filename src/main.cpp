@@ -108,6 +108,7 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
+
     cout << "Noisy image saved to " << output_image_path << endl;
 
     //! 3. Reshape original and noisy image to vectors v and w
@@ -138,36 +139,12 @@ int main(int argc, char* argv[]){
     //! 5 Applied the A_1 smooth filter to the noisy image doing a matrix vector multiplication
 
     // Multiply A_1 with w (noisy image vector)
-    VectorXd result_vector = A_1 * w;
-        //% This matrix vector multiplication provide a vector that have to convert into a 2D image -->
+    const string smooth_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    appliedConvolutionToImage(A_1, w, smooth_image_path, n, m, channels);
+        //% in this fucntion the matrix vector multiplication is computed and then the image is saved
+        //% using a function saveImage() to finish the procedure 
 
-    // Reshape result_vector to image matrix
-    MatrixXd result_image(m, n);
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            result_image(i, j) = result_vector((i * n) + j);
-        }
-    }
-
-    // Save the resulting image
-    // Vector to store unsigned char pixel values (for the image)
-    vector<unsigned char> output_image_data(m * n);
-
-    // Convert the MatrixXd to unsigned char and clamp values between 0 and 255
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            // Clamp the result to [0, 255] and cast it to unsigned char
-            output_image_data[i * n + j] = static_cast<unsigned char>(std::min(std::max(result_image(i, j), 0.0), 255.0));
-        }
-    }
-
-    // Save the resulting image using utils 
-    const string result_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
-    saveImage(result_image_path, width, height, channels, output_image_data);
-
-
-
-    //! 6 
+    //! 6 Write a convolutional operator for the sharpeing kernel H_sh2
     // construct A_2 matrix using the H_sh2 kernel 
     SparseMatrix<double> A_2 = createConvolutionalMatrix(n,m, H_sh2);
 
@@ -178,8 +155,14 @@ int main(int argc, char* argv[]){
         cout << "Matrix A_2 is transpose ? --> True"  << endl;
     }
     
+    //! 7 Applied previous convolution to the original image
+    // Multiply A_2 with v (original image vector)
+    const string sharpen_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/sharpen_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    appliedConvolutionToImage(A_2, v, sharpen_image_path, n, m, channels);
+        //% in this fucntion the matrix vector multiplication is computed and then the image is saved
+        //% using a function saveImage() to finish the procedure
 
-    //! 7
+    //! 8
 
 
     return 0;
