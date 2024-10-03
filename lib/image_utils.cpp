@@ -17,6 +17,9 @@ MatrixXd H_av2 = MatrixXd::Constant(3, 3, constantValue);
 //& H_sh2
 MatrixXd H_sh2; // Define H_sh2 here
 
+//& H_lap
+MatrixXd H_lap; // Define H_sh2 here
+
 // initialize kernels 
 void initializeKernels() {
     H_sh2 = MatrixXd::Zero(3, 3);  // Initialize to zero
@@ -26,7 +29,14 @@ void initializeKernels() {
     // H_sh2 << 0.0, -1.0, 0.0,
     //          -1.0, 5.0, -1.0,
     //          0.0, -1.0, 0.0;
+
+    H_lap = MatrixXd::Zero(3, 3);  // Initialize to zero
+    H_lap << 0.0, -1.0, 0.0,
+             -1.0, 4.0, -1.0,
+             0.0, -1.0, 0.0;
+    // H_sh2 << 0.0, -1.0, 0.
 }
+
 
 // Initialize functions
 void saveImage(const string& path, int width, int height, int channels, const vector<unsigned char>& image_data) {

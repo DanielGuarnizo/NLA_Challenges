@@ -15,6 +15,7 @@ using namespace Eigen;
 
 extern MatrixXd H_av2;
 extern MatrixXd H_sh2;
+extern MatrixXd H_lap;
     
 void saveImage(const string& path, int width, int height, int channels, const vector<unsigned char>& image_data);
 
