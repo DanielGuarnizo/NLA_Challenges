@@ -1,18 +1,27 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <unsupported/Eigen/SparseExtra>
 #include <vector>
 #include <iostream>
 #include <cstdlib>   // For rand() and srand()
 #include <ctime>     // For time()
+#include <algorithm>
+#include <fstream>
+#include <string>
+
+
 
 // my utils
 #include "../include/image_utils.hpp"
+
 
 // Include header files to read and write in images
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../include/stb_image_write.h"
+
+
 
 /*
 Defining the STB_IMAGE_IMPLEMENTATION and STB_IMAGE_WRITE_IMPLEMENTATION macros 
@@ -23,12 +32,19 @@ using namespace Eigen;
 using namespace std;
 
 
+
+
+
+
+
+
 int main(int argc, char* argv[]){
     // Initialize the kernels before using them
     initializeKernels();
+    // Seed the random number generator once, before the loop
+    srand(static_cast<unsigned int>(time(0)));
 
-    //@ Note:char* instead of taking the string that we pass as argument 
-    //@ it takes the pointer where this string is saved in memory
+
    
 
     //! 1. POINT: LOAD IMAGE AND PRINT DIMENTIONS
@@ -40,31 +56,12 @@ int main(int argc, char* argv[]){
     }
 
     // Load the image
-    const char* input_image_path = argv[1]; // this variable is a pointer for a constant string, so a memory adress where the image is stored
-    cout << "input_image_path:" << input_image_path << endl;
     int width, height, channels;
-    unsigned char* image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
-        //% It decodes the image data into a linear array of pixels, stored in image_data, where each pixel’s color is represented by one or more bytes (depending on the number of channels).
-        //% image_data[0]: refers to the first byte of the loaded image data, if gray scale image then if the first color, if RGB image then it's the first channel.
-        //% image_data[0]: accesses the first pixel value (the first byte of the image data), not the first character of the pointer’s value (the address).
-    
-    //@ TESTS
-    // cout << "Firts pixel value without static_cast: " << image_data[0] << endl; // here i am seeing the asci code that represent the 64 value of the first index
-    // cout << "First pixel value with static_cast: " << static_cast<int>(image_data[0]) << endl;
-    // cout << "Pointer address: " << static_cast<void*>(image_data) << endl;
+    unsigned char* image_data = load_image(argv[1], width, height, channels);
 
-    // Check if the image was loaded correctly 
-    if(!image_data){
-        cerr << "Error: could not load the image: " << input_image_path << endl;
-        return 1;
-    }
-
-    // if loaded then print dimentions
-    cout << "Image loaded: " << width << "x" << height << " with " << channels << " channels." << endl;
 
     //! 2. POINT: INTRDUCE NOISE SIGNAL INTO THE LOADED IMAGE
 
-    // First we cast each value of the image to an int value, in such a way to be able to perform operations
     MatrixXd original_image(height, width); // initialize the matrix where we will store the casting values
     
     for (int i = 0; i < height; ++i) {
@@ -76,39 +73,18 @@ int main(int argc, char* argv[]){
     // Free memory
     stbi_image_free(image_data);
 
-    // check top left corner of the original image
-    cout << "ORIGINAL IMAGE:" << endl << original_image.topLeftCorner(6,6) << endl;
 
-    // first we have to define the noise image 
-    Matrix<unsigned char, Dynamic, Dynamic, RowMajor> noisy_image(height, width);
-        //% We have to define the matrix in this way because we don't knwo yet the size of the matrix
-        //% then the size will be found in run time, also we want to be sure it's unsigned char, given that we know for sure 
-        //% that we are handle positive values in a range of [0,255], given that is a gray image 
+    auto noisy_image = addNoiseToImage(original_image);
 
-    // Seed the random number generator once, before the loop
-    srand(static_cast<unsigned int>(time(0)));
-
-    // We will applied to each pixel a random fluctation of color ranging between [-50,50]
-    noisy_image = original_image.unaryExpr([](int val) -> unsigned char {
-        // Generate random noise in range [-50, 50]
-        int noise = (rand() % 101) - 50; // random number between 0 and 100, then shift to [-50, 50]
-
-        // Apply noise, ensuring values stay within the [0, 255] range
-        int new_val = val + noise;
-        if (new_val < 0) new_val = 0;
-        if (new_val > 255) new_val = 255;
-        return static_cast<unsigned char>(new_val);
-    });
 
     // Save the noisy_image using stb_image_write
-    const string output_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/noisy_image.png";
+    const string output_image_path = "./data/images/noisy_image.png";
     if (stbi_write_png(output_image_path.c_str(), width, height, 1, noisy_image.data(), width) == 0){
         // c_str: is to pass the output path in C_style
         cerr << "Error: Could not save noisy image" << endl;
         return 1;
     }
-
-    cout << "Noisy image saved to " << output_image_path << endl;
+    std::cout << "Image saved as " << output_image_path.substr(output_image_path.find_last_of('/') + 1) << std::endl;
 
     //! 3. Reshape original and noisy image to vectors v and w
 
@@ -125,6 +101,7 @@ int main(int argc, char* argv[]){
     }
 
     cout << "The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
+    cout << "The Euclidean norm of v is: " << v.norm() << endl;
 
     //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
 
@@ -139,30 +116,18 @@ int main(int argc, char* argv[]){
 
     // Multiply A_1 with w (noisy image vector)
     VectorXd result_vector = A_1 * w;
-        //% This matrix vector multiplication provide a vector that have to convert into a 2D image -->
 
-    // Reshape result_vector to image matrix
-    MatrixXd result_image(m, n);
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            result_image(i, j) = result_vector((i * n) + j);
-        }
-    }
-
-    // Save the resulting image
     // Vector to store unsigned char pixel values (for the image)
     vector<unsigned char> output_image_data(m * n);
 
-    // Convert the MatrixXd to unsigned char and clamp values between 0 and 255
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            // Clamp the result to [0, 255] and cast it to unsigned char
-            output_image_data[i * n + j] = static_cast<unsigned char>(std::min(std::max(result_image(i, j), 0.0), 255.0));
-        }
+    // Convert result_vector to unsigned char and clamp values between 0 and 255 in a single loop
+    for (int i = 0; i < m * n; ++i) {
+        // Use std::clamp to restrict values between 0 and 255, and cast to unsigned char
+        output_image_data[i] = static_cast<unsigned char>(clamp(result_vector(i), 0.0, 255.0));
     }
 
     // Save the resulting image using utils 
-    const string result_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    const string result_image_path = "./data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     saveImage(result_image_path, width, height, channels, output_image_data);
 
 
@@ -179,8 +144,35 @@ int main(int argc, char* argv[]){
     }
     
 
-    //! 7
+    //! 7 Apply the previous sharpening filter to the original image v
+    result_vector = A_2 * v;
 
+    for (int i = 0; i < m * n; ++i) {
+        // normalize
+        double pixel_value = result_vector(i) / 255.0;
+        // Use std::clamp to restrict values between 0 and 255, and cast to unsigned char
+        output_image_data[i] = static_cast<unsigned char>(clamp(pixel_value, 0.0, 1.0)*255.0);
+    }
+
+    // Save the resulting image using utils
+    const string sharpened_image_path = "./data/images/sharpened_image.png";
+    saveImage(sharpened_image_path, width, height, channels, output_image_data);
+
+    //! 8.
+    // Export the Eigen matrix A2 and vector w in the .mtx format. 
+    // Using a suitable iterative
+    // solver and preconditioner technique available in the LIS library compute the approximate
+    // solution to the linear system A2x = w prescribing a tolerance of 10−9. Report here the
+    // iteration count and the final residual.
+
+
+    // Export A_2 and w to the .mtx format
+    string A_2_path = "./data/matrices/A_2.mtx";
+    string w_path = "./data/matrices/w.mtx";
+
+    // Export A_2 and w to the .mtx format
+    Eigen::saveMarket(A_2, A_2_path);
+    Eigen::saveMarketVector(w, w_path);
 
     return 0;
 }

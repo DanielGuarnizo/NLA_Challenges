@@ -6,6 +6,9 @@
 #include "stb_image_write.h"  // STB library for writing images
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <algorithm>
+#include <fstream>
+
 
 using namespace std; 
 using namespace Eigen;
@@ -14,10 +17,17 @@ using namespace Eigen;
 
 extern MatrixXd H_av2;
 extern MatrixXd H_sh2;
+
+// Function to load an image from a file using stb_image
+unsigned char* load_image(const char* input_image_path, int& width, int& height, int& channels);
     
 void saveImage(const string& path, int width, int height, int channels, const vector<unsigned char>& image_data);
 
+// Function to add noise to the image
+Matrix<unsigned char, Dynamic, Dynamic, RowMajor> addNoiseToImage(const MatrixXd &original_image);
+
 SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const MatrixXd& kernel);
+
 
 void initializeKernels();
 
