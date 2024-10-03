@@ -2,6 +2,9 @@
 # #! COMMAND TO RUN THE MAIN FILE 
 #./run.sh main ./data/images/256px-Albert_Einstein_Head.jpg
 
+#! Comand to run for solve linear system 
+# mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/sparse_matrix.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/vector.mtx sol.txt hist.txt -i cg -tol 1.0e-13
+# mpirun -n 4 ./test1 matA.mtx vecB.mtx sol.txt hist.txt -i cg 
 #!/bin/bash
 
 # Check if at least one argument (the filename) was provided
@@ -43,3 +46,4 @@ if [ $? -eq 0 ]; then
 else
     echo "Compilation failed."
 fi
+

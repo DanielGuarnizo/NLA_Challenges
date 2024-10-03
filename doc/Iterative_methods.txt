@@ -1,0 +1,28 @@
+COMMAND TO RUN THE BEST RESULT TO SOLVE A_2 AND W
+
+root@b0a7b4a37975 test # mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/sparse_matrix.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/vector.mtx sol.txt hist.txt -i bicgstab -tol 1.0e-13
+
+RESULT 
+
+number of processes = 4
+matrix size = 87296 x 87296 (782086 nonzero entries)
+
+initial vector x      : all components set to 0
+precision             : double
+linear solver         : BiCGSTAB
+preconditioner        : none
+convergence condition : ||b-Ax||_2 <= 1.0e-13 * ||b-Ax_0||_2
+matrix storage format : CSR
+linear solver status  : normal end
+
+BiCGSTAB: number of iterations = 74
+BiCGSTAB:   double             = 74
+BiCGSTAB:   quad               = 0
+BiCGSTAB: elapsed time         = 3.301646e-02 sec.
+BiCGSTAB:   preconditioner     = 9.482840e-04 sec.
+BiCGSTAB:     matrix creation  = 5.000000e-07 sec.
+BiCGSTAB:   linear solver      = 3.206817e-02 sec.
+BiCGSTAB: relative residual    = 9.303350e-14
+
+ITERATION COUNT = 74
+FINAL RESIDUAL = 9.303350e-14
