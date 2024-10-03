@@ -7,6 +7,10 @@
 #include <fstream>  // library to read files in c++ 
 #include <unsupported/Eigen/SparseExtra>
 
+// iterative solvers 
+#include <Eigen/SparseLU>  // Needed for IncompleteLU
+#include <Eigen/IterativeLinearSolvers>  // Needed for BiCGSTAB
+
 // my utils
 #include "../include/image_utils.hpp"
 
@@ -162,7 +166,7 @@ int main(int argc, char* argv[]){
 
     cout << "The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
 
-     cout << "The Euclidean Norm of the vector v is: "<< v.norm() << endl;
+    cout << "The Euclidean Norm of the vector v is: "<< v.norm() << endl;
 
     //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
 
@@ -202,21 +206,11 @@ int main(int argc, char* argv[]){
         //% using a function saveImage() to finish the procedure
 
     //! 8 Export A_2 and w in .mtx format and compute the approximate solution using the LIS library
-   
-   // Export matrix and vector to .mtx files
-    //exportSparseMatrixToMTX(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx");
-
-    // unnormalize the vector w,which is the noisy image
-    // VectorXd z(m*n); 
-    // for(int i= 0; i < m*n; i++){
-    //     z(i) = static_cast<int>(v(i) * 255);
-    // }
-    // exportVectorToMTX(z, "vector.mtx");
-    //exportVectorToMTX(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/w.mtx");
-    
+     
     saveMarket(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx");
     saveMarketVector(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx");
 
+    
     //! 9 Import the solution on the previous iteration and save it as a png image 
     const string path_filename = "/home/jellyfish/shared-folder/lis-2.0.34/test/sol_x.txt";
     const string approximate_solution_x_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solution_x_image.png"; 
@@ -240,37 +234,72 @@ int main(int argc, char* argv[]){
     const string edge_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/edge_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_3, v, edge_image_path, n, m, channels);
 
-    //! 11
+    //! 11 
+    cout << "1\n";
+    SparseMatrix<double> I(m * n, m * n);
 
-    //! non ho capito come funziona questa parte del codice
-    // Create the sparse result matrix for I - A_3
-    // SparseMatrix<double> I_minus_A3(n * m, n * m);
+    vector<Triplet<double>> tripletList;
+    // tripletList.reserve(n*m);
+    
+    cout << "2\n";
+    for(int i = 0; i < n*m; i++){
+        tripletList.push_back(Triplet<double>(i,i, 1));
+    }
 
-    // // Fill in the identity part
-    // for (int i = 0; i < n * m; ++i) {
-    //     I_minus_A3.insert(i, i) = 1.0; // Set the diagonal entries to 1
-    // }
+    cout << "3\n";
+    I.setFromTriplets(tripletList.begin(), tripletList.end());
 
-    // // Subtract A_3 from I
-    // for (int k = 0; k < A_3.outerSize(); ++k) {
-    //     for (SparseMatrix<double>::InnerIterator it(A_3, k); it; ++it) {
-    //         I_minus_A3.coeffRef(it.row(), it.col()) -= it.value(); // Subtract the A_3 values
-    //     }
-    // }
+    // Ensure that I_minus_A3 is defined before use
+    SparseMatrix<double> I_minus_A3 = I - A_3; // Subtract A_3 from identity matrix I
 
+    VectorXd y(I_minus_A3.rows());
+    VectorXd b = v; // Assume you're solving I_minus_A3 * y = v, so b = v
 
-    // // Export matrix and vector to .mtx files
-    // exportSparseMatrixToMTX(I_minus_A3, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/I_minus_A_3.mtx");
-    // exportVectorToMTX(v, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/v.mtx");
+    // Set parameters for solver
+    double tol = 10.e-10; // Convergence tolerance (unchanged)
+    int maxit = 2000;     // Maximum iterations
 
-    const string sol_y_path_filename = "/home/jellyfish/shared-folder/lis-2.0.34/test/sol_y.txt";
-    const string approximate_solution_y_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solution_y_image.png"; 
+    // Create a preconditioner, Incomplete Cholesky is suitable for symmetric matrices
+    Eigen::IncompleteCholesky<double> ichol(I_minus_A3);
 
-    loadSolutionFromFile(sol_y_path_filename, n, m, channels, approximate_solution_y_image_path);
+    // Set up and use Conjugate Gradient solver
+    Eigen::ConjugateGradient<SparseMatrix<double>, Eigen::Lower | Eigen::Upper, Eigen::IncompleteCholesky<double>> cg;
+    cg.setMaxIterations(maxit);
+    cg.setTolerance(tol);
+    cg.compute(I_minus_A3);
 
-    cout << "Approximate y solution saved correctly" << endl;
+    y = cg.solve(b);
 
+    // Output solver results
+    std::cout << "#iterations:     " << cg.iterations() << std::endl;
+    std::cout << "relative residual: " << cg.error() << std::endl;      
+            
+        
+        
+    
+    
+    
+    cout << "4\n";
+    // save y vector as image 
+    vector<unsigned char> output_image_y(m * n);
+
+    // Convert the MatrixXd to unsigned char and clamp values between 0 and 255
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            // Clamp the result to [0, 255] and cast it to unsigned char
+            output_image_y[i * n + j] = static_cast<unsigned char>(std::min(std::max((y(i * n + j) * 255.0), 0.0), 255.0));
+        }
+    }
+
+    cout << "5\n";
+    // Save the resulting image using utils 
+    const string approximate_solutionEigen_y_image = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solutionEigen_y_image.png"; 
+    saveImage(approximate_solutionEigen_y_image, n, m, channels, output_image_y);
 
     return 0;
     
 }
+
+
+
+ 
