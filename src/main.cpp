@@ -246,7 +246,7 @@ int main(int argc, char* argv[]){
     //! 8 Export A_2 and w in .mtx format and compute the approximate solution using the LIS library
    
    // Export matrix and vector to .mtx files
-    exportSparseMatrixToMTX(A_2, "sparse_matrix.mtx");
+    exportSparseMatrixToMTX(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/sparse_matrix.mtx");
 
     // unnormalize the vector w,which is the noisy image
     // VectorXd z(m*n); 
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]){
     //     z(i) = static_cast<int>(v(i) * 255);
     // }
     // exportVectorToMTX(z, "vector.mtx");
-    exportVectorToMTX(w, "vector.mtx");
+    exportVectorToMTX(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/vector.mtx");
 
 
     //! 9 Import the solution on the previous iteration and save it as a png image 
