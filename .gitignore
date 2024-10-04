@@ -20,6 +20,6 @@ Thumbs.db
 .idea/
 
 # Ignore data and bin directories
-data/
+bin/
 
 
