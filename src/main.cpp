@@ -285,25 +285,29 @@ int main(int argc, char* argv[]){
     appliedConvolutionToImage(A_3, v, edge_image_path, n, m, channels);
 
     //! 11  COMMENT THIS PART OF THE CODE WHEN THE A_2 AND W .MTX HAVE TO BE COMPUTED 
-    cout << "1\n";
+    // cout << "1\n";
     SparseMatrix<double> I(m * n, m * n);
+    I.setIdentity();
 
-    vector<Triplet<double>> tripletList;
-    // tripletList.reserve(n*m);
+    // vector<Triplet<double>> tripletList;
+    // // tripletList.reserve(n*m);
     
-    cout << "2\n";
-    for(int i = 0; i < n*m; i++){
-        tripletList.push_back(Triplet<double>(i,i, 1));
-    }
+    // cout << "2\n";
+    // for(int i = 0; i < n*m; i++){
+    //     tripletList.push_back(Triplet<double>(i,i, 1));
+    // }
 
-    cout << "3\n";
-    I.setFromTriplets(tripletList.begin(), tripletList.end());
+    // cout << "3\n";
+    // I.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    // unnormalize vector 
+    //VectorXd
 
     // Ensure that I_minus_A3 is defined before use
-    SparseMatrix<double> I_minus_A3 = I - A_3; // Subtract A_3 from identity matrix I
+    SparseMatrix<double> I_minus_A3 = I + A_3; // Subtract A_3 from identity matrix I
 
     VectorXd y(I_minus_A3.rows());
-    VectorXd b = v; // Assume you're solving I_minus_A3 * y = v, so b = v
+    VectorXd b = w; // Assume you're solving I_minus_A3 * y = v, so b = v
 
     // Set parameters for solver
     double tol = 10.e-10; // Convergence tolerance (unchanged)
