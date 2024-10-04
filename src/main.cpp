@@ -27,6 +27,50 @@ before including these headers enables the actual function implementations.
 
 using namespace Eigen;
 using namespace std;
+// Function to export an Eigen sparse matrix to .mtx format
+void exportSparseMatrixToMTX(const SparseMatrix<double>& A, const std::string& filename) {
+    ofstream file(filename);
+
+    if (file.is_open()) {
+        // Write the Matrix Market header for a sparse matrix
+        file << "%%MatrixMarket matrix coordinate real general\n";
+        file << A.rows() << " " << A.cols() << " " << A.nonZeros() << "\n";
+
+        // Iterate over non-zero elements in the sparse matrix
+        for (int k = 0; k < A.outerSize(); ++k) {
+            for (SparseMatrix<double>::InnerIterator it(A, k); it; ++it) {
+                file << it.row() + 1 << " " << it.col() + 1 << " " << it.value() << "\n";  // 1-based indexing
+            }
+        }
+
+        file.close();
+        cout << "Sparse matrix exported to " << filename << "\n";
+    } else {
+        cerr << "Unable to open file for writing matrix.\n";
+    }
+}
+
+// Function to export an Eigen vector to .mtx format
+void exportVectorToMTX(const VectorXd& w, const std::string& filename) {
+    ofstream file(filename);
+
+    if (file.is_open()) {
+        // Write the Matrix Market header for an array (vector)
+        file << "%%MatrixMarket vector coordinate real general\n";
+        file << w.size() << "\n";  // Vector is treated as a single column matrix
+
+        // Write the vector elements
+        for (int i = 0; i < w.size(); ++i) {
+            file << i + 1 << " " << w(i) << "\n";
+        }
+
+        file.close();
+        cout << "Vector exported to " << filename << "\n";
+    } else {
+        cerr << "Unable to open file for writing vector.\n";
+    }
+}
+
 
 
 void loadSolutionFromFile(const string& path_filename, const int n, const int m, const int channels, const string& result_image_path) {
@@ -207,8 +251,13 @@ int main(int argc, char* argv[]){
 
     //! 8 Export A_2 and w in .mtx format and compute the approximate solution using the LIS library
      
+    // Using provided functions 
     saveMarket(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx");
-    saveMarketVector(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx");
+    saveMarketVector(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/w.mtx");
+
+    // using my functions 
+    exportSparseMatrixToMTX(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_A_2.mtx");
+    exportVectorToMTX(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_w.mtx");
 
     
     //! 9 Import the solution on the previous iteration and save it as a png image 
@@ -230,11 +279,12 @@ int main(int argc, char* argv[]){
         cout << "Matrix A_3 is symmetric ? --> True"  << endl;
     }
 
+
     // Multiply A_3 with v (original image vector)
     const string edge_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/edge_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_3, v, edge_image_path, n, m, channels);
 
-    //! 11 
+    //! 11  COMMENT THIS PART OF THE CODE WHEN THE A_2 AND W .MTX HAVE TO BE COMPUTED 
     cout << "1\n";
     SparseMatrix<double> I(m * n, m * n);
 

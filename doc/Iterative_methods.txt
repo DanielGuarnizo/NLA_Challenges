@@ -1,6 +1,12 @@
 COMMAND TO RUN THE BEST RESULT TO SOLVE A_2 AND W
+module load lis
+cd lis-2.0.34/test/
 
-root@b0a7b4a37975 test # mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/sparse_matrix.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/vector.mtx sol_x.txt hist_x.txt -i bicgstab -tol 1.0e-13
+## SAVING THE MATRIX AND VECTOR WITH THE FUNCTION PROVIDED BY EIGEN IT DOESN'T WORK 
+mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/w.mtx sol_x.txt hist_x.txt -i bicgstab -tol 1.0e-9
+
+#### I DONT KNOW WHY BUT WITH THIS ONE WORKS 
+mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_A_2.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_w.mtx sol_x.txt hist_x.txt -i bicgstab -tol 1.0e-19
 
 RESULT 
 
