@@ -6,7 +6,7 @@ cd lis-2.0.34/test/
 mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/w.mtx sol_x.txt hist_x.txt -i bicgstab -tol 1.0e-9
 
 #### I DONT KNOW WHY BUT WITH THIS ONE WORKS 
-mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_A_2.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_w.mtx sol_x.txt hist_x.txt -i bicgstab -tol 1.0e-9
+mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_A_2.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_w.mtx sol_x.txt hist_x.txt -i bicgstab -tol 10.0e-9
 
 RESULT 
 
@@ -17,25 +17,20 @@ initial vector x      : all components set to 0
 precision             : double
 linear solver         : BiCGSTAB
 preconditioner        : none
-convergence condition : ||b-Ax||_2 <= 1.0e-13 * ||b-Ax_0||_2
+convergence condition : ||b-Ax||_2 <= 1.0e-08 * ||b-Ax_0||_2
 matrix storage format : CSR
 linear solver status  : normal end
 
-BiCGSTAB: number of iterations = 74
-BiCGSTAB:   double             = 74
+BiCGSTAB: number of iterations = 45
+BiCGSTAB:   double             = 45
 BiCGSTAB:   quad               = 0
-BiCGSTAB: elapsed time         = 3.203800e-02 sec.
-BiCGSTAB:   preconditioner     = 9.288760e-04 sec.
-BiCGSTAB:     matrix creation  = 4.170000e-07 sec.
-BiCGSTAB:   linear solver      = 3.110913e-02 sec.
-BiCGSTAB: relative residual    = 3.785713e-14
+BiCGSTAB: elapsed time         = 2.031150e-02 sec.
+BiCGSTAB:   preconditioner     = 5.652100e-04 sec.
+BiCGSTAB:     matrix creation  = 2.500000e-07 sec.
+BiCGSTAB:   linear solver      = 1.974629e-02 sec.
+BiCGSTAB: relative residual    = 6.878466e-09
 
 
-ITERATION COUNT = 74
-FINAL RESIDUAL = 3.785713e-14
+ITERATION COUNT = 45
+FINAL RESIDUAL = 6.878466e-09
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-COMMAND TO RUN THE BEST RESULT TO SOLVE A_3 AND v
-
-root@b0a7b4a37975 test # mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/I_minus_A_3.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/v.mtx sol_y.txt hist_y.txt -i cg -tol 10.0e-10

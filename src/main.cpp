@@ -143,7 +143,7 @@ int main(int argc, char* argv[]){
     }
 
     // if loaded then print dimentions
-    cout << "Image loaded: " << width << "x" << height << " with " << channels << " channels." << endl;
+    cout << "TASK 1: " << width << "x" << height << " with " << channels << " channels." << endl;
 
     //! 2. POINT: INTRDUCE NOISE SIGNAL INTO THE LOADED IMAGE
 
@@ -210,7 +210,7 @@ int main(int argc, char* argv[]){
 
     cout << "The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
 
-    cout << "The Euclidean Norm of the vector v is: "<< v.norm() << endl;
+    cout << "TASK 3: "<< v.norm() << endl;
 
     //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
 
@@ -279,12 +279,12 @@ int main(int argc, char* argv[]){
         cout << "Matrix A_3 is symmetric ? --> True"  << endl;
     }
 
-
+    //! 11  Matrix vector multiplication with the previous sharpen matrix  
     // Multiply A_3 with v (original image vector)
     const string edge_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/edge_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_3, v, edge_image_path, n, m, channels);
 
-    //! 11  COMMENT THIS PART OF THE CODE WHEN THE A_2 AND W .MTX HAVE TO BE COMPUTED 
+    //! 12  compute the approximate solution to the linear system (I+A3)*y = w
     // cout << "1\n";
     SparseMatrix<double> I(m * n, m * n);
     I.setIdentity();
