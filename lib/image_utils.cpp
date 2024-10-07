@@ -110,7 +110,7 @@ SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const M
                     int imgY = j + kj - 1;
 
                     // Check if the indices are within bounds
-                    if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n)
+                    if (imgX >= 0 && imgX < m && imgY >= 0 && imgY < n && kernel(ki, kj) != 0)
                     {
                         int kernelIndex = imgX * n + imgY;                            // specify the column index in the sparse matrix
                         tripletList.emplace_back(index, kernelIndex, kernel(ki, kj)); // Use emplace_back for efficiency
