@@ -44,11 +44,11 @@ void saveImage(const string& path, int width, int height, int channels, const ve
     if (stbi_write_png(path.c_str(), width, height, channels, image_data.data(), width * channels) == 0) {
         cerr << "Error: Could not save the image to " << path << endl;
     } else {
-        cout << "Image saved successfully to " << path << endl;
+        //cout << "Image saved successfully to " << path << endl;
     }
 }
 
-SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const MatrixXd& kernel){
+SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const MatrixXd& kernel, const string matrix_name){
 
      // Initialize the A matrix
     SparseMatrix<double> A(m * n, m * n);
@@ -80,7 +80,7 @@ SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const M
             }
         }
     }
-    cout << "The number of non zero entries in the A matrix are: " << count << endl;
+    cout << "  The number of non zero entries in the A_"<< matrix_name << " matrix are: " << count << endl;
 
     // Construct the sparse matrix
     A.setFromTriplets(tripletList.begin(), tripletList.end());

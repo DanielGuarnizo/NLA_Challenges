@@ -44,9 +44,9 @@ void exportSparseMatrixToMTX(const SparseMatrix<double>& A, const std::string& f
         }
 
         file.close();
-        cout << "Sparse matrix exported to " << filename << "\n";
+        cout << "  Sparse matrix exported to " << filename << "\n";
     } else {
-        cerr << "Unable to open file for writing matrix.\n";
+        cerr << "  Unable to open file for writing matrix.\n";
     }
 }
 
@@ -65,9 +65,9 @@ void exportVectorToMTX(const VectorXd& w, const std::string& filename) {
         }
 
         file.close();
-        cout << "Vector exported to " << filename << "\n";
+        cout << "  Vector exported to " << filename << "\n";
     } else {
-        cerr << "Unable to open file for writing vector.\n";
+        cerr << "  Unable to open file for writing vector.\n";
     }
 }
 
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]){
     }
 
     // if loaded then print dimentions
-    cout << "TASK 1: " << width << "x" << height << " with " << channels << " channels." << endl;
+    cout << "TASK 1:\n" << "  " <<height << "x" << width << endl;
 
     //! 2. POINT: INTRDUCE NOISE SIGNAL INTO THE LOADED IMAGE
 
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]){
     stbi_image_free(image_data);
 
     // check top left corner of the original image
-    cout << "ORIGINAL IMAGE:" << endl << original_image.topLeftCorner(6,6) << endl;
+    // cout << "ORIGINAL IMAGE:" << endl << original_image.topLeftCorner(6,6) << endl;
 
     // first we have to define the noise image 
     Matrix<unsigned char, Dynamic, Dynamic, RowMajor> noisy_image(height, width);
@@ -192,7 +192,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    cout << "Noisy image saved to " << output_image_path << endl;
+    cout << "TAKS 2:\n"<< "  " << "Noisy image saved to "<< output_image_path << endl;
 
     //! 3. Reshape original and noisy image to vectors v and w and perform norm 
 
@@ -208,9 +208,9 @@ int main(int argc, char* argv[]){
         }
     }
 
-    cout << "The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
-
-    cout << "TASK 3: "<< v.norm() << endl;
+    cout << "TASK 3: \n";
+    cout << "  The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
+    cout << "  " << original_image.norm() << endl;
 
     //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
 
@@ -219,35 +219,42 @@ int main(int argc, char* argv[]){
     int n = width;
 
     // make a function that creates the convolutional matrix and provided 
-    SparseMatrix<double> A_1 = createConvolutionalMatrix(m, n, H_av2);
+    cout << "TASK 4:\n";
+    SparseMatrix<double> A_1 = createConvolutionalMatrix(m, n, H_av2, "1");
 
     //! 5 Applied the A_1 smooth filter to the noisy image doing a matrix vector multiplication
 
     // Multiply A_1 with w (noisy image vector)
+    cout << "TASK 5:\n";
     const string smooth_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_1, w, smooth_image_path, n, m, channels);
         //% in this fucntion the matrix vector multiplication is computed and then the image is saved
         //% using a function saveImage() to finish the procedure 
 
+    cout << "  Smooth image saved into " << smooth_image_path << endl;
+
     //! 6 Write a convolutional operator for the sharpeing kernel H_sh2
+    cout << "TASK 6:\n";
     // construct A_2 matrix using the H_sh2 kernel 
-    SparseMatrix<double> A_2 = createConvolutionalMatrix(m,n, H_sh2);
+    SparseMatrix<double> A_2 = createConvolutionalMatrix(m,n, H_sh2, "2");
 
     // check if A_2 is symmetric
     if(A_2.isApprox(A_2.transpose()) == 0) {
-        cout << "Matrix A_2 is symmetric ? --> False"  << endl;
+        cout << "  Matrix A_2 is symmetric ? --> False"  << endl;
     } else {
-        cout << "Matrix A_2 is symmetric ? --> True"  << endl;
+        cout << "  Matrix A_2 is symmetric ? --> True"  << endl;
     }
         //% if the matrix is not symmetric to solve a linear system we have to use a iterative methods suitable for not symmetric matrices 
     
     //! 7 Applied previous convolution to the original image
 
+    cout << "TASK 7:\n";
     // Multiply A_2 with v (original image vector)
     const string sharpen_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/sharpen_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_2, v, sharpen_image_path, n, m, channels);
         //% in this fucntion the matrix vector multiplication is computed and then the image is saved
         //% using a function saveImage() to finish the procedure
+    cout << "  Sharpen image saved into " << sharpen_image_path << endl;
 
     //! 8 Export A_2 and w in .mtx format and compute the approximate solution using the LIS library
      
@@ -261,47 +268,38 @@ int main(int argc, char* argv[]){
 
     
     //! 9 Import the solution on the previous iteration and save it as a png image 
-    const string path_filename = "/home/jellyfish/shared-folder/lis-2.0.34/test/sol_x.txt";
+    const string path_filename = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/sol_x.txt";
     const string approximate_solution_x_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solution_x_image.png"; 
 
     loadSolutionFromFile(path_filename, n, m, channels, approximate_solution_x_image_path);
 
-    cout << "Approximate x solution saved correctly" << endl;
+    cout << "TASK 9:\n";
+    cout << "  Approximate x solution saved correctly into " << approximate_solution_x_image_path <<endl;
 
     //! 10 
+    cout << "TASK 10:\n";
     // construct A_3 matrix using the H_lap kernel 
-    SparseMatrix<double> A_3 = createConvolutionalMatrix(m,n, H_lap);
+    SparseMatrix<double> A_3 = createConvolutionalMatrix(m,n, H_lap, "3");
 
     // check if A_3 is symmetric
     if(A_3.isApprox(A_3.transpose()) == 0) {
-        cout << "Matrix A_3 is symmetric ? --> False"  << endl;
+        cout <<  "  Matrix A_3 is symmetric ? --> False"  << endl;
     } else {
-        cout << "Matrix A_3 is symmetric ? --> True"  << endl;
+        cout << "  Matrix A_3 is symmetric ? --> True"  << endl;
     }
 
     //! 11  Matrix vector multiplication with the previous sharpen matrix  
     // Multiply A_3 with v (original image vector)
     const string edge_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/edge_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_3, v, edge_image_path, n, m, channels);
+    cout << "TASK 11:\n";
+    cout << "  Edge image saved into " << edge_image_path << endl;
 
     //! 12  compute the approximate solution to the linear system (I+A3)*y = w
-    // cout << "1\n";
+    cout << "TASK 12:\n";
+
     SparseMatrix<double> I(m * n, m * n);
     I.setIdentity();
-
-    // vector<Triplet<double>> tripletList;
-    // // tripletList.reserve(n*m);
-    
-    // cout << "2\n";
-    // for(int i = 0; i < n*m; i++){
-    //     tripletList.push_back(Triplet<double>(i,i, 1));
-    // }
-
-    // cout << "3\n";
-    // I.setFromTriplets(tripletList.begin(), tripletList.end());
-
-    // unnormalize vector 
-    //VectorXd
 
     // Ensure that I_minus_A3 is defined before use
     SparseMatrix<double> I_minus_A3 = I + A_3; // Subtract A_3 from identity matrix I
@@ -325,15 +323,10 @@ int main(int argc, char* argv[]){
     y = cg.solve(b);
 
     // Output solver results
-    std::cout << "#iterations:     " << cg.iterations() << std::endl;
-    std::cout << "relative residual: " << cg.error() << std::endl;      
+    std::cout << "  Number of iterations:     " << cg.iterations() << std::endl;
+    std::cout << "  Relative residual: " << cg.error() << std::endl;      
             
-        
-        
-    
-    
-    
-    cout << "4\n";
+
     // save y vector as image 
     vector<unsigned char> output_image_y(m * n);
 
@@ -345,7 +338,6 @@ int main(int argc, char* argv[]){
         }
     }
 
-    cout << "5\n";
     // Save the resulting image using utils 
     const string approximate_solutionEigen_y_image = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solutionEigen_y_image.png"; 
     saveImage(approximate_solutionEigen_y_image, n, m, channels, output_image_y);

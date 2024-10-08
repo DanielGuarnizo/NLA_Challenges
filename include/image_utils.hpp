@@ -19,7 +19,7 @@ extern MatrixXd H_lap;
     
 void saveImage(const string& path, int width, int height, int channels, const vector<unsigned char>& image_data);
 
-SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const MatrixXd& kernel);
+SparseMatrix<double> createConvolutionalMatrix(const int m, const int n, const MatrixXd& kernel, const string matrix_name);
 
 void initializeKernels();
 

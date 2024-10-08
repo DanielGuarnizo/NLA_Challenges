@@ -5,8 +5,8 @@
 #! Comand to run for solve linear system 
 # mpirun -n 4 ./test1 /home/jellyfish/shared-folder/Challenge_1_NLA/sparse_matrix.mtx /home/jellyfish/shared-folder/Challenge_1_NLA/vector.mtx sol.txt hist.txt -i cg -tol 1.0e-13
 # mpirun -n 4 ./test1 matA.mtx vecB.mtx sol.txt hist.txt -i cg 
-#!/bin/bash
 
+#!/bin/bash
 # Check if at least one argument (the filename) was provided
 if [ $# -lt 1 ]; then
     echo "Usage: ./run.sh <filename (without .cpp extension)> [args]"
