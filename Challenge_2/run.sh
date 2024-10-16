@@ -31,8 +31,9 @@ fi
 mkdir -p "${bin_dir}"
 
 # Compile the file using g++, saving the executable in the bin/ directory
-# g++ -I ${include_dir} -I ${mkEigenInc} "${src_dir}/${filename}.cpp" "${lib_dir}/image_utils.cpp" -o "${bin_dir}/${filename}"
+#g++ -I ${include_dir} -I ${mkEigenInc} "${src_dir}/${filename}.cpp" "${lib_dir}/utils.cpp" -o "${bin_dir}/${filename}"
 g++ -I ${include_dir} -I ${mkEigenInc} "${src_dir}/${filename}.cpp" -o "${bin_dir}/${filename}"
+
 # Check if the compilation succeeded
 if [ $? -eq 0 ]; then
     echo "Compilation successful."
