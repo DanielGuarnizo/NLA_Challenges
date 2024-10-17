@@ -1,25 +1,32 @@
 # Ignore node_modules directory
 node_modules/
+Challenge_1/node_modules/
 
 # Ignore log files
 *.log
+Challenge_1/*.log
 
 # Ignore build directories
-dist/
-build/
+Challenge_1/dist/
+Challenge_1/build/
 
 # Ignore environment variable files
+Challenge_1/.env
 .env
 
 # Ignore OS generated files
+Challenge_1/.DS_Store
 .DS_Store
+Challenge_1/Thumbs.db
 Thumbs.db
 
 # Ignore IDE specific files
-.vscode/
-.idea/
+Challenge_1/.vscode/
+Challenge_1/.vscode/
+Challenge_1/.idea/
+Challenge_1/.idea/
 
 # Ignore data and bin directories
-bin/
+Challenge_1/bin/
 
 
