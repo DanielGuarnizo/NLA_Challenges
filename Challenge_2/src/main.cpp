@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
     cout << "  Norm of matrix with singular values of Noisy checkerboard image: " << singular_values_noisy_image.norm() << endl;
 
     //! TASK 11: Compute matrices C and D
-    int k_5 = 5;
+    int k_5 = 2;
     int k_10 = 10;
     DiagonalMatrix<double, Dynamic> Epsilon_1(singular_values_noisy_image);
 

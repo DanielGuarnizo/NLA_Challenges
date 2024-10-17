@@ -1,4 +1,4 @@
-#include "/home/jellyfish/shared-folder/Challenge_1_NLA/include/stb_image_write.h"
+#include "../include/stb_image_write.h"
 #include "../include/image_utils.hpp"
 #include <iostream>
 #include <vector>

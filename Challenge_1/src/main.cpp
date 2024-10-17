@@ -184,7 +184,7 @@ int main(int argc, char* argv[]){
     });
 
     // Save the noisy_image using stb_image_write
-    const string output_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/noisy_image.png";
+    const string output_image_path = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/images/noisy_image.png";
     if (stbi_write_png(output_image_path.c_str(), width, height, 1, noisy_image.data(), width) == 0){
         // c_str: is to pass the output path in C_style
         cerr << "Error: Could not save noisy image" << endl;
@@ -210,7 +210,8 @@ int main(int argc, char* argv[]){
 
     cout << "TASK 3: \n";
     cout << "  The size of vector v is: " << v.size() << " and vector w is "<< w.size() << " where HeightxWidth is: "<< height*width << endl ;
-    cout << "  " << original_image.norm() << endl;
+    cout << "  " << v.norm() << endl;
+    //cout << "  " << original_image.norm() << endl;
 
     //! 4. Write a convolution operation of smooth kernel H_av2 as matrix vector multiplication where A_1 is the convolutional matrix 
 
@@ -226,7 +227,7 @@ int main(int argc, char* argv[]){
 
     // Multiply A_1 with w (noisy image vector)
     cout << "TASK 5:\n";
-    const string smooth_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    const string smooth_image_path = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/images/smooth_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_1, w, smooth_image_path, n, m, channels);
         //% in this fucntion the matrix vector multiplication is computed and then the image is saved
         //% using a function saveImage() to finish the procedure 
@@ -250,7 +251,7 @@ int main(int argc, char* argv[]){
 
     cout << "TASK 7:\n";
     // Multiply A_2 with v (original image vector)
-    const string sharpen_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/sharpen_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    const string sharpen_image_path = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/images/sharpen_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_2, v, sharpen_image_path, n, m, channels);
         //% in this fucntion the matrix vector multiplication is computed and then the image is saved
         //% using a function saveImage() to finish the procedure
@@ -259,17 +260,17 @@ int main(int argc, char* argv[]){
     //! 8 Export A_2 and w in .mtx format and compute the approximate solution using the LIS library
      
     // Using provided functions 
-    saveMarket(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/A_2.mtx");
-    saveMarketVector(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/w.mtx");
+    saveMarket(A_2, "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/MTX_objects/A_2.mtx");
+    saveMarketVector(w, "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/MTX_objects/w.mtx");
 
     // using my functions 
-    exportSparseMatrixToMTX(A_2, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_A_2.mtx");
-    exportVectorToMTX(w, "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/my_w.mtx");
+    exportSparseMatrixToMTX(A_2, "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/MTX_objects/my_A_2.mtx");
+    exportVectorToMTX(w, "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/MTX_objects/my_w.mtx");
 
     
     //! 9 Import the solution on the previous iteration and save it as a png image 
-    const string path_filename = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/MTX_objects/sol_x.txt";
-    const string approximate_solution_x_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solution_x_image.png"; 
+    const string path_filename = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/MTX_objects/sol_x.txt";
+    const string approximate_solution_x_image_path = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/images/approximate_solution_x_image.png"; 
 
     loadSolutionFromFile(path_filename, n, m, channels, approximate_solution_x_image_path);
 
@@ -290,7 +291,7 @@ int main(int argc, char* argv[]){
 
     //! 11  Matrix vector multiplication with the previous sharpen matrix  
     // Multiply A_3 with v (original image vector)
-    const string edge_image_path = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/edge_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
+    const string edge_image_path = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/images/edge_image.png"; //! ADD ALWAYS THE ABSOLUTE PATH, OTHERWISE IT CANNOT SAVE IT 
     appliedConvolutionToImage(A_3, v, edge_image_path, n, m, channels);
     cout << "TASK 11:\n";
     cout << "  Edge image saved into " << edge_image_path << endl;
@@ -339,7 +340,7 @@ int main(int argc, char* argv[]){
     }
 
     // Save the resulting image using utils 
-    const string approximate_solutionEigen_y_image = "/home/jellyfish/shared-folder/Challenge_1_NLA/data/images/approximate_solutionEigen_y_image.png"; 
+    const string approximate_solutionEigen_y_image = "/home/jellyfish/shared-folder/NLA_Challenges/Challenge_1/data/images/approximate_solutionEigen_y_image.pngg"; 
     saveImage(approximate_solutionEigen_y_image, n, m, channels, output_image_y);
 
     return 0;
